@@ -43,10 +43,10 @@ local function navToMendax()
     mq.cmdf('/nav %s | dist=12', navCmd)
     mq.delay(1000, function() return nav.Active() end)
 
-    local maxWait = 6000
+    local maxWait = 20000
     while nav.Active() and maxWait > 0 do
-        mq.delay(100)
-        maxWait = maxWait - 100
+        mq.delay(500)
+        maxWait = maxWait - 500
     end
 
     return getMendaxDistance() < 20

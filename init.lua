@@ -110,6 +110,6 @@ if not navToMendax() then
 end
 
 mendax.DoTarget()
-mq.delay(250, function() return mq.TLO.Target.ID() == mendax() and mendax.ID() or 999 end)
+mq.delay(250, function() return mq.TLO.Target.ID() == (mendax() and mendax.ID() or 999) end)
 
 tradeAllBooks()

@@ -1,0 +1,65 @@
+name: Publish to RedGuides
+
+on:
+  push:
+    branches: [main]
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Extract version from init.lua
+        id: version
+        run: |
+          VERSION=$(grep -oP 'version\s*=\s*"\K[0-9]+\.[0-9]+(\.[0-9]+)?' init.lua)
+          if [ -z "$VERSION" ]; then
+            echo "::error::Could not extract version from init.lua"
+            exit 1
+          fi
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+
+      - name: Check if already published
+        id: check
+        run: |
+          if git rev-parse "v${{ steps.version.outputs.version }}" >/dev/null 2>&1; then
+            echo "exists=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "exists=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Build zip file
+        if: steps.check.outputs.exists == 'false'
+        run: git archive --format=zip --prefix="${{ github.event.repository.name }}/" -o "${{ github.event.repository.name }}.zip" HEAD
+
+      - name: Create message from git log
+        if: steps.check.outputs.exists == 'false'
+        run: |
+          PREV=$(git describe --tags --abbrev=0 HEAD^ 2>/dev/null || echo "")
+          git log --no-merges --pretty=format:"- [%s](${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/commit/%H)%n%n%b%n%n~ %an" ${PREV:+$PREV..}HEAD > rg_release_notes.md
+
+      - name: Create tag
+        if: steps.check.outputs.exists == 'false'
+        run: |
+          git config user.name "github-actions"
+          git config user.email "github-actions@github.com"
+          git tag "v${{ steps.version.outputs.version }}"
+          git push origin "v${{ steps.version.outputs.version }}"
+
+      - name: Publish to RedGuides
+        if: steps.check.outputs.exists == 'false'
+        uses: RedGuides/redguides-publish@v1
+        env:
+          REDGUIDES_API_KEY: ${{ secrets.REDGUIDES_API_KEY }}
+        with:
+          resource_id: "3303"
+          version: "${{ steps.version.outputs.version }}"
+          file: "${{ github.event.repository.name }}.zip"
+          message: "rg_release_notes.md"
+          domain: "https://raw.githubusercontent.com/${{ github.repository }}/${{ github.event.repository.default_branch }}/"

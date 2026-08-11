@@ -4,7 +4,7 @@
 
 local mq = require('mq')
 
-local version = "1.0"
+local version = "1.1"
 
 local nav = mq.TLO.Navigation
 local server = mq.TLO.EverQuest.Server()
@@ -12,7 +12,7 @@ local mendax = mq.TLO.Spawn("=Master Mendax")
 local books = {
     "Grimoire of Profound Experience",
     "Grimoire of Boundless Experience",
-    "Grimoire of Otherwordly Experience",
+    "Grimoire of Otherworldly Experience",
     "Grimoire of Raidleader Experience",
 }
 

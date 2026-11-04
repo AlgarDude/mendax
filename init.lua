@@ -1,10 +1,10 @@
 -- Mendax by Algar
--- A macroquest script to trade all of your AA books into Master Mendax on the EQ Might server.
+-- A macroquest script to trade all of your AA books into Master Mendax on the EQ Might or Project Might servers.
 -- /lua run mendax to start. The script will see itself out when finished.
 
 local mq = require('mq')
 
-local version = "1.1"
+local version = "1.2"
 
 local nav = mq.TLO.Navigation
 local server = mq.TLO.EverQuest.Server()
@@ -117,8 +117,8 @@ end
 -- Main
 print("Mendax: Starting Book Check...")
 
-if server ~= "EQ Might" then
-    printf("Mendax: This is a script intended for the EQ Might server. The detected server is: %s. Exiting.", server)
+if server ~= "EQ Might" and server ~= "Project Might" then
+    printf("Mendax: This is a script intended for the EQ/Project Might server. The detected server is: %s. Exiting.", server)
     return
 end
 
